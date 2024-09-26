@@ -240,6 +240,19 @@ object SettingsReaderScreen : SearchableSettings {
                     enabled = navMode != 5,
                 ),
                 Preference.PreferenceItem.ListPreference(
+                    pref = readerPreferences.pagerNavInverted(),
+                    title = stringResource(MR.strings.pref_read_with_tapping_inverted),
+                    entries = persistentListOf(
+                        ReaderPreferences.TappingInvertMode.NONE,
+                        ReaderPreferences.TappingInvertMode.HORIZONTAL,
+                        ReaderPreferences.TappingInvertMode.VERTICAL,
+                        ReaderPreferences.TappingInvertMode.BOTH,
+                    )
+                        .associateWith { stringResource(it.titleRes) }
+                        .toImmutableMap(),
+                    enabled = navMode != 5,
+                ),
+                Preference.PreferenceItem.ListPreference(
                     pref = imageScaleTypePref,
                     title = stringResource(MR.strings.pref_image_scale_type),
                     entries = ReaderPreferences.ImageScaleType
@@ -302,17 +315,28 @@ object SettingsReaderScreen : SearchableSettings {
 
     @Composable
     private fun getWebtoonGroup(readerPreferences: ReaderPreferences): Preference.PreferenceGroup {
+
         val numberFormat = remember { NumberFormat.getPercentInstance() }
 
         val navModePref = readerPreferences.navigationModeWebtoon()
         val dualPageSplitPref = readerPreferences.dualPageSplitWebtoon()
         val rotateToFitPref = readerPreferences.dualPageRotateToFitWebtoon()
         val webtoonSidePaddingPref = readerPreferences.webtoonSidePadding()
+        val webtoonScrollDistancePref = readerPreferences.webtoonScrollDistance()
+        val variableStepScrollingPref = readerPreferences.variableStepScrolling()
+
 
         val navMode by navModePref.collectAsState()
         val dualPageSplit by dualPageSplitPref.collectAsState()
         val rotateToFit by rotateToFitPref.collectAsState()
         val webtoonSidePadding by webtoonSidePaddingPref.collectAsState()
+        val webtoonScrollDistance by webtoonScrollDistancePref.collectAsState()
+        val variableStepScrolling by variableStepScrollingPref.collectAsState()
+
+
+        if(!variableStepScrolling){
+            webtoonScrollDistancePref.set(12)
+        }
 
         return Preference.PreferenceGroup(
             title = stringResource(MR.strings.webtoon_viewer),
@@ -348,6 +372,27 @@ object SettingsReaderScreen : SearchableSettings {
                         webtoonSidePaddingPref.set(it)
                         true
                     },
+                ),
+                //Variable Step Scrolling
+                Preference.PreferenceItem.SwitchPreference(
+                    pref = readerPreferences.variableStepScrolling(),
+                    //title = "Variable Step Scrolling",//another placeholder until I know how to use stringResource
+                    title = stringResource(MR.strings.pref_webtoon_variable_step_scrolling),
+                ),
+//                <string name="pref_webtoon_variable_step_scrolling">Variable step scrolling</string>
+//                <string name="pref_webtoon_scroll_amount">Scroll amount</string>
+                Preference.PreferenceItem.SliderPreference(
+                    value = webtoonScrollDistance,
+                    //title = "Scroll Amount", //placeholder because I don't know how each language part is generated
+                    title = stringResource(MR.strings.pref_webtoon_scroll_amount),
+                    subtitle = numberFormat.format(webtoonScrollDistance / 16f),
+                    min = ReaderPreferences.WEBTOON_SCROLLING_MIN,
+                    max = ReaderPreferences.WEBTOON_SCROLLING_MAX,
+                    onValueChanged = {
+                        webtoonScrollDistancePref.set(it)
+                        true
+                    },
+                    enabled = variableStepScrolling,
                 ),
                 Preference.PreferenceItem.ListPreference(
                     pref = readerPreferences.readerHideThreshold(),

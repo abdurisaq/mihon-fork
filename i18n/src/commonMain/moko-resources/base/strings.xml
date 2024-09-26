@@ -195,7 +195,7 @@
     <string name="onboarding_guides_returning_user">Reinstalling %s?</string>
 
     <!-- Preferences -->
-      <!-- Subsections -->
+    <!-- Subsections -->
     <string name="pref_category_general">General</string>
     <string name="pref_category_appearance">Appearance</string>
     <string name="pref_category_library">Library</string>
@@ -215,7 +215,7 @@
     <string name="pref_security_summary">App lock, secure screen</string>
     <string name="pref_advanced_summary">Dump crash logs, battery optimizations</string>
 
-      <!-- General section -->
+    <!-- General section -->
     <string name="pref_category_theme">Theme</string>
     <string name="pref_app_theme">App theme</string>
     <string name="theme_system">System</string>
@@ -256,7 +256,7 @@
 
     <string name="relative_time_today">Today</string>
 
-      <!-- Library section -->
+    <!-- Library section -->
     <string name="pref_category_display">Display</string>
     <string name="pref_library_columns">Grid size</string>
     <string name="pref_library_columns_per_row">%d per row</string>
@@ -303,7 +303,7 @@
     <!-- This should be to the right for RTL locales -->
     <string name="pref_chapter_swipe_start">Swipe to left action</string>
 
-      <!-- Extension section -->
+    <!-- Extension section -->
     <string name="multi_lang">Multi</string>
     <string name="ext_updates_pending">Updates pending</string>
     <string name="ext_update">Update</string>
@@ -354,7 +354,7 @@
     <string name="action_replace_repo_title">Signing Key Fingerprint Already Exists</string>
     <string name="action_replace_repo_message">Repository %1$s has the same Signing Key Fingerprint as %2$s.\nIf this is expected, %2$s will be replaced, otherwise contact your repo maintainer.</string>
 
-      <!-- Reader section -->
+    <!-- Reader section -->
     <string name="pref_fullscreen">Fullscreen</string>
     <string name="pref_show_navigation_mode">Show tap zones overlay</string>
     <string name="pref_show_navigation_mode_summary">Briefly show when reader is opened</string>
@@ -462,6 +462,8 @@
     <string name="pref_category_reading_mode">Reading mode</string>
     <string name="pref_category_reading">Reading</string>
     <string name="pref_webtoon_side_padding">Side padding</string>
+    <string name="pref_webtoon_variable_step_scrolling">Variable step scrolling</string>
+    <string name="pref_webtoon_scroll_amount">Scroll amount</string>
     <string name="pref_hide_threshold">Sensitivity for hiding menu on scroll</string>
     <string name="pref_highest">Highest</string>
     <string name="pref_high">High</string>
@@ -469,7 +471,7 @@
     <string name="pref_lowest">Lowest</string>
     <string name="pref_webtoon_disable_zoom_out">Disable zoom out</string>
 
-      <!-- Downloads section -->
+    <!-- Downloads section -->
     <string name="pref_category_delete_chapters">Delete chapters</string>
     <string name="pref_remove_after_marked_as_read">After manually marked as read</string>
     <string name="pref_remove_after_read">After reading automatically delete</string>
@@ -505,10 +507,10 @@
     <string name="action_track">Track</string>
     <string name="track_activity_name">Tracker login</string>
 
-      <!-- Browse section -->
+    <!-- Browse section -->
     <string name="pref_hide_in_library_items">Hide entries already in library</string>
 
-      <!-- Data and storage section -->
+    <!-- Data and storage section -->
     <string name="pref_storage_location">Storage location</string>
     <string name="pref_storage_location_info">Used for automatic backups, chapter downloads, and local source.</string>
     <string name="pref_create_backup">Create backup</string>
@@ -559,7 +561,7 @@
     <string name="syncing_library">Syncing library</string>
     <string name="library_sync_complete">Library sync complete</string>
 
-      <!-- Advanced section -->
+    <!-- Advanced section -->
     <string name="label_network">Networking</string>
     <string name="pref_clear_cookies">Clear cookies</string>
     <string name="pref_dns_over_https">DNS over HTTPS (DoH)</string>
@@ -598,7 +600,7 @@
     <string name="pref_verbose_logging_summary">Print verbose logs to system log (reduces app performance)</string>
     <string name="pref_debug_info">Debug info</string>
 
-      <!-- About section -->
+    <!-- About section -->
     <string name="website">Website</string>
     <string name="version">Version</string>
     <string name="whats_new">What\'s new</string>

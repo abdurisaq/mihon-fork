@@ -25,6 +25,7 @@ import tachiyomi.core.common.util.system.logcat
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
+import java.io.Reader
 import kotlin.math.max
 import kotlin.math.min
 
@@ -50,7 +51,8 @@ class WebtoonViewer(val activity: ReaderActivity, val isContinuous: Boolean = tr
     /**
      * Distance to scroll when the user taps on one side of the recycler view.
      */
-    private val scrollDistance = activity.resources.displayMetrics.heightPixels * 3 / 4
+    private val scrollDistance = activity.resources.displayMetrics.heightPixels * 3/4
+
 
     /**
      * Layout manager of the recycler view.
@@ -77,6 +79,12 @@ class WebtoonViewer(val activity: ReaderActivity, val isContinuous: Boolean = tr
             .readerHideThreshold()
             .get()
             .threshold
+    private val scrollAmount: Int =
+        Injekt.get<ReaderPreferences>()
+            .webtoonScrollDistance()
+            .get()
+
+    private val arrowKeyScrollDistance = activity.resources.displayMetrics.heightPixels * (scrollAmount)/16
 
     init {
         recycler.setItemViewCacheSize(RECYCLER_VIEW_CACHE_SIZE)
@@ -282,22 +290,40 @@ class WebtoonViewer(val activity: ReaderActivity, val isContinuous: Boolean = tr
     /**
      * Scrolls up by [scrollDistance].
      */
-    private fun scrollUp() {
-        if (config.usePageTransitions) {
-            recycler.smoothScrollBy(0, -scrollDistance)
-        } else {
-            recycler.scrollBy(0, -scrollDistance)
+    private fun scrollUp(microScrolling : Boolean = false) {
+        if(microScrolling){
+            if (config.usePageTransitions) {
+                recycler.smoothScrollBy(0, -arrowKeyScrollDistance)
+
+            } else {
+                recycler.scrollBy(0, -arrowKeyScrollDistance)
+
+            }
+        }else {
+            if (config.usePageTransitions) {
+                recycler.smoothScrollBy(0, -scrollDistance)
+            } else {
+                recycler.scrollBy(0, -scrollDistance)
+            }
         }
     }
 
     /**
      * Scrolls down by [scrollDistance].
      */
-    private fun scrollDown() {
-        if (config.usePageTransitions) {
-            recycler.smoothScrollBy(0, scrollDistance)
-        } else {
-            recycler.scrollBy(0, scrollDistance)
+    private fun scrollDown(microScrolling : Boolean = false) {
+        if(microScrolling){
+            if (config.usePageTransitions) {
+                recycler.smoothScrollBy(0, arrowKeyScrollDistance)
+            } else {
+                recycler.scrollBy(0, arrowKeyScrollDistance)
+            }
+        }else {
+            if (config.usePageTransitions) {
+                recycler.smoothScrollBy(0, scrollDistance)
+            } else {
+                recycler.scrollBy(0, scrollDistance)
+            }
         }
     }
 
@@ -326,14 +352,19 @@ class WebtoonViewer(val activity: ReaderActivity, val isContinuous: Boolean = tr
             KeyEvent.KEYCODE_MENU -> if (isUp) activity.toggleMenu()
 
             KeyEvent.KEYCODE_DPAD_LEFT,
-            KeyEvent.KEYCODE_DPAD_UP,
             KeyEvent.KEYCODE_PAGE_UP,
             -> if (isUp) scrollUp()
 
+            KeyEvent.KEYCODE_DPAD_UP,
+            -> if (isUp) scrollUp(true)
+
             KeyEvent.KEYCODE_DPAD_RIGHT,
-            KeyEvent.KEYCODE_DPAD_DOWN,
             KeyEvent.KEYCODE_PAGE_DOWN,
+            KeyEvent.KEYCODE_SPACE,
             -> if (isUp) scrollDown()
+
+            KeyEvent.KEYCODE_DPAD_DOWN,
+            -> if (isUp) scrollDown(true)
             else -> return false
         }
         return true
