@@ -35,7 +35,7 @@ interface Viewer {
      * Called from the containing activity when a key [event] is received. It should return true
      * if the event was handled, false otherwise.
      */
-    fun handleKeyEvent(event: KeyEvent): Boolean
+    fun handleKeyEvent(event: KeyEvent,isLongPress:Int): Boolean
 
     /**
      * Called from the containing activity when a generic motion [event] is received. It should

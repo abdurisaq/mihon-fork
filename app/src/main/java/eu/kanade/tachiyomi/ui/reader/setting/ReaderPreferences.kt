@@ -11,6 +11,7 @@ class ReaderPreferences(
     private val preferenceStore: PreferenceStore,
 ) {
 
+
     // region General
 
     fun pageTransitions() = preferenceStore.getBoolean("pref_enable_transitions_key", true)
@@ -172,7 +173,7 @@ class ReaderPreferences(
         const val WEBTOON_PADDING_MAX = 25
 
         const val WEBTOON_SCROLLING_MIN = 1
-        const val WEBTOON_SCROLLING_MAX = 16
+        const val WEBTOON_SCROLLING_MAX = 20
         const val MILLI_CONVERSION = 100
 
         val TapZones = listOf(

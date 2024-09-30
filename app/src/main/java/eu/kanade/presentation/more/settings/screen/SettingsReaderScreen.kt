@@ -335,7 +335,7 @@ object SettingsReaderScreen : SearchableSettings {
 
 
         if(!variableStepScrolling){
-            webtoonScrollDistancePref.set(12)
+            webtoonScrollDistancePref.set(10)
         }
 
         return Preference.PreferenceGroup(
@@ -385,7 +385,7 @@ object SettingsReaderScreen : SearchableSettings {
                     value = webtoonScrollDistance,
                     //title = "Scroll Amount", //placeholder because I don't know how each language part is generated
                     title = stringResource(MR.strings.pref_webtoon_scroll_amount),
-                    subtitle = numberFormat.format(webtoonScrollDistance / 16f),
+                    subtitle = numberFormat.format(webtoonScrollDistance / 20f),
                     min = ReaderPreferences.WEBTOON_SCROLLING_MIN,
                     max = ReaderPreferences.WEBTOON_SCROLLING_MAX,
                     onValueChanged = {

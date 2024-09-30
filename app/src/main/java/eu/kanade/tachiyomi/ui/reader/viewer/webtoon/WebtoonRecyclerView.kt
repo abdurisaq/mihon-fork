@@ -10,6 +10,7 @@ import android.view.ViewConfiguration
 import android.view.animation.DecelerateInterpolator
 import androidx.core.animation.doOnEnd
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.LinearSmoothScroller
 import androidx.recyclerview.widget.RecyclerView
 import eu.kanade.tachiyomi.ui.reader.viewer.GestureDetectorWithLongTap
 import kotlin.math.abs
@@ -34,6 +35,9 @@ class WebtoonRecyclerView @JvmOverloads constructor(
     private var firstVisibleItemPosition = 0
     private var lastVisibleItemPosition = 0
     private var currentScale = DEFAULT_RATE
+
+    private var scrollAnimator: ValueAnimator? = null
+    private var currentScrollingKeyCode: Int? = null
     var zoomOutDisabled = false
         set(value) {
             field = value
@@ -98,6 +102,40 @@ class WebtoonRecyclerView @JvmOverloads constructor(
         }
         val maxPositionY = halfHeight * (currentScale - 1)
         return positionY.coerceIn(-maxPositionY, maxPositionY)
+    }
+
+    fun startContinuousScroll(keyCode: Int,speed: Float) {
+
+        stopScroll()
+
+        val displayMetrics = context.resources.displayMetrics
+        val recyclerViewHeight = displayMetrics.heightPixels
+
+        val scrollSpeed = (recyclerViewHeight * abs(speed)).toInt()
+
+
+        val smoothScroller = object : LinearSmoothScroller(context) {
+            override fun calculateSpeedPerPixel(displayMetrics: android.util.DisplayMetrics): Float {
+
+                return (1000f / scrollSpeed)
+            }
+        }
+
+        smoothScroller.targetPosition = if (speed < 0) {
+            0  // Scroll to the top if speed is negative
+        } else {
+            adapter?.itemCount?.minus(1) ?: 0  // Scroll to the bottom if speed is positive
+        }
+
+        layoutManager?.startSmoothScroll(smoothScroller)
+
+        currentScrollingKeyCode = keyCode
+    }
+    fun stopContinuousScroll() {
+        scrollAnimator?.cancel() // Cancel the animator
+        stopScroll()
+        scrollAnimator = null // Reset the animator
+        currentScrollingKeyCode = null // Clear the key code
     }
 
     private fun zoom(

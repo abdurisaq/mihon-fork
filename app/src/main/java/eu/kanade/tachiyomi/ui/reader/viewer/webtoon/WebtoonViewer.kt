@@ -25,7 +25,6 @@ import tachiyomi.core.common.util.system.logcat
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
-import java.io.Reader
 import kotlin.math.max
 import kotlin.math.min
 
@@ -84,7 +83,8 @@ class WebtoonViewer(val activity: ReaderActivity, val isContinuous: Boolean = tr
             .webtoonScrollDistance()
             .get()
 
-    private val arrowKeyScrollDistance = activity.resources.displayMetrics.heightPixels * (scrollAmount)/16
+    private val arrowKeyScrollDistance = activity.resources.displayMetrics.heightPixels * (scrollAmount)/20
+
 
     init {
         recycler.setItemViewCacheSize(RECYCLER_VIEW_CACHE_SIZE)
@@ -331,9 +331,15 @@ class WebtoonViewer(val activity: ReaderActivity, val isContinuous: Boolean = tr
      * Called from the containing activity when a key [event] is received. It should return true
      * if the event was handled, false otherwise.
      */
-    override fun handleKeyEvent(event: KeyEvent): Boolean {
+
+
+    override fun handleKeyEvent(event: KeyEvent, isLongPress:Int): Boolean {
         val isUp = event.action == KeyEvent.ACTION_UP
 
+
+
+
+        // Handle specific key events
         when (event.keyCode) {
             KeyEvent.KEYCODE_VOLUME_DOWN -> {
                 if (!config.volumeKeysEnabled || activity.viewModel.state.value.menuVisible) {
@@ -349,6 +355,41 @@ class WebtoonViewer(val activity: ReaderActivity, val isContinuous: Boolean = tr
                     if (!config.volumeKeysInverted) scrollUp() else scrollDown()
                 }
             }
+            KeyEvent.KEYCODE_S ->{
+                when(isLongPress){
+                    0 ->{
+                        println("OptionTest: 1")
+                        scrollDown()
+                    }
+                    1 ->{
+                        println("OptionTest: 2")
+                        recycler.startContinuousScroll(event.keyCode,0.5f)
+                    }
+                    2 ->{
+                        recycler.stopContinuousScroll()
+                        println("OptionTest: 3")
+                    }
+                }
+
+            }
+            KeyEvent.KEYCODE_W ->{
+                when(isLongPress){
+                    0 ->{
+                        println("OptionTest: 1")
+                        scrollUp()
+                    }
+                    1 ->{
+                        println("OptionTest: 2")
+                        recycler.startContinuousScroll(event.keyCode,-0.5f)
+                    }
+                    2 ->{
+                        recycler.stopContinuousScroll()
+                        println("OptionTest: 3")
+                    }
+                }
+
+            }
+
             KeyEvent.KEYCODE_MENU -> if (isUp) activity.toggleMenu()
 
             KeyEvent.KEYCODE_DPAD_LEFT,
@@ -360,11 +401,14 @@ class WebtoonViewer(val activity: ReaderActivity, val isContinuous: Boolean = tr
 
             KeyEvent.KEYCODE_DPAD_RIGHT,
             KeyEvent.KEYCODE_PAGE_DOWN,
+            -> if (isUp) scrollDown()
+
             KeyEvent.KEYCODE_SPACE,
             -> if (isUp) scrollDown()
 
             KeyEvent.KEYCODE_DPAD_DOWN,
-            -> if (isUp) scrollDown(true)
+            -> if (isUp) scrollDown()
+
             else -> return false
         }
         return true

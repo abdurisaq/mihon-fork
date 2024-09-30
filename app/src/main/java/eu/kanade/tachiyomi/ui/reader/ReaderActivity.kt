@@ -139,6 +139,7 @@ class ReaderActivity : BaseActivity() {
     var isScrollingThroughPages = false
         private set
 
+    private var isLongPress = 0
     /**
      * Called when the activity is created. Initializes the presenter and configuration.
      */
@@ -299,24 +300,80 @@ class ReaderActivity : BaseActivity() {
         }
     }
 
-    override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
-        if (keyCode == KeyEvent.KEYCODE_N) {
-            loadNextChapter()
+    override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
+        if(keyCode ==KeyEvent.KEYCODE_S){
+            event.startTracking()
             return true
-        } else if (keyCode == KeyEvent.KEYCODE_P) {
-            loadPreviousChapter()
+        }else if(keyCode ==KeyEvent.KEYCODE_W){
+            event.startTracking()
             return true
         }
-        return super.onKeyUp(keyCode, event)
+        return super.onKeyDown(keyCode, event)
+    }
+    override fun onKeyUp(keyCode: Int, event: KeyEvent): Boolean {
+        when(keyCode){
+            KeyEvent.KEYCODE_N ->{
+                loadNextChapter()
+                return true
+            }
+            KeyEvent.KEYCODE_P ->{
+                loadPreviousChapter()
+                return true
+            }
+            KeyEvent.KEYCODE_S ->{
+                if(isLongPress == 0) {
+
+                    println("short press scroll")
+                    viewModel.state.value.viewer?.handleKeyEvent(event,0)
+                }else{
+                    println("long press release")
+
+                    viewModel.state.value.viewer?.handleKeyEvent(event,2)
+                }
+                isLongPress =0
+                return true
+            }
+            KeyEvent.KEYCODE_W ->{
+                if(isLongPress == 0) {
+
+                    println("short press scroll")
+                    viewModel.state.value.viewer?.handleKeyEvent(event,0)
+                }else{
+                    println("long press release")
+
+                    viewModel.state.value.viewer?.handleKeyEvent(event,2)
+                }
+                isLongPress =0
+                return true
+            }
+            else -> return super.onKeyUp(keyCode, event)
+        }
+
     }
 
+    override fun onKeyLongPress(keyCode: Int, event: KeyEvent): Boolean {
+        if(keyCode ==KeyEvent.KEYCODE_S){
+            println("long press scroll")
+            isLongPress = 1
+            viewModel.state.value.viewer?.handleKeyEvent(event,1)
+            return true
+        }else if(keyCode ==KeyEvent.KEYCODE_W){
+            println("long press scroll")
+            isLongPress = 1
+            viewModel.state.value.viewer?.handleKeyEvent(event,1)
+            return true
+        }
+        return super.onKeyLongPress(keyCode, event)
+    }
     /**
      * Dispatches a key event. If the viewer doesn't handle it, call the default implementation.
      */
-    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
-        val handled = viewModel.state.value.viewer?.handleKeyEvent(event) ?: false
-        return handled || super.dispatchKeyEvent(event)
-    }
+
+//    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+//
+//        val handled = viewModel.state.value.viewer?.handleKeyEvent(event,isLongPress) ?: false
+//        return handled || super.dispatchKeyEvent(event)
+//    }
 
     /**
      * Dispatches a generic motion event. If the viewer doesn't handle it, call the default

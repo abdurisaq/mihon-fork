@@ -376,7 +376,7 @@ abstract class PagerViewer(val activity: ReaderActivity) : Viewer {
      * Called from the containing activity when a key [event] is received. It should return true
      * if the event was handled, false otherwise.
      */
-    override fun handleKeyEvent(event: KeyEvent): Boolean {
+    override fun handleKeyEvent(event: KeyEvent,isLongPress:Int): Boolean {
         val isUp = event.action == KeyEvent.ACTION_UP
         val ctrlPressed = event.metaState.and(KeyEvent.META_CTRL_ON) > 0
 
