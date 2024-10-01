@@ -1,11 +1,13 @@
 package eu.kanade.presentation.more.settings.screen
 
 import android.os.Build
+import android.view.KeyEvent
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalView
+import eu.kanade.presentation.more.settings.KeybindAction
 import eu.kanade.presentation.more.settings.Preference
 import eu.kanade.tachiyomi.ui.reader.setting.ReaderOrientation
 import eu.kanade.tachiyomi.ui.reader.setting.ReaderPreferences
@@ -481,6 +483,7 @@ object SettingsReaderScreen : SearchableSettings {
                     title = stringResource(MR.strings.pref_create_folder_per_manga),
                     subtitle = stringResource(MR.strings.pref_create_folder_per_manga_summary),
                 ),
+
             ),
         )
     }

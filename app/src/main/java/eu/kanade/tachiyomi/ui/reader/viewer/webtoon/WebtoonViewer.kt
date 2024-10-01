@@ -83,8 +83,20 @@ class WebtoonViewer(val activity: ReaderActivity, val isContinuous: Boolean = tr
             .webtoonScrollDistance()
             .get()
 
+    private val keybind =
+        Injekt.get<ReaderPreferences>()
+            .keybinds()
+            .get()
     private val arrowKeyScrollDistance = activity.resources.displayMetrics.heightPixels * (scrollAmount)/20
+    private val baseScrollDistance = activity.resources.displayMetrics.heightPixels
 
+    private val functionMap: Map<String, (Float) -> Unit> = mapOf(
+        "scrollUp" to ::scrollUp,
+        "scrollDown" to ::scrollDown,
+        "startContinuousScroll" to recycler::startContinuousScroll,
+        "stopContinuousScroll" to recycler::stopContinuousScroll
+
+    )
 
     init {
         recycler.setItemViewCacheSize(RECYCLER_VIEW_CACHE_SIZE)
@@ -290,40 +302,27 @@ class WebtoonViewer(val activity: ReaderActivity, val isContinuous: Boolean = tr
     /**
      * Scrolls up by [scrollDistance].
      */
-    private fun scrollUp(microScrolling : Boolean = false) {
-        if(microScrolling){
+    private fun scrollUp(speed: Float = 0.75f) {
             if (config.usePageTransitions) {
-                recycler.smoothScrollBy(0, -arrowKeyScrollDistance)
+                recycler.smoothScrollBy(0, (-baseScrollDistance*speed).toInt())
 
             } else {
-                recycler.scrollBy(0, -arrowKeyScrollDistance)
+                recycler.scrollBy(0, (-baseScrollDistance*speed).toInt())
 
             }
-        }else {
-            if (config.usePageTransitions) {
-                recycler.smoothScrollBy(0, -scrollDistance)
-            } else {
-                recycler.scrollBy(0, -scrollDistance)
-            }
-        }
+
     }
 
     /**
      * Scrolls down by [scrollDistance].
      */
-    private fun scrollDown(microScrolling : Boolean = false) {
-        if(microScrolling){
-            if (config.usePageTransitions) {
-                recycler.smoothScrollBy(0, arrowKeyScrollDistance)
-            } else {
-                recycler.scrollBy(0, arrowKeyScrollDistance)
-            }
-        }else {
-            if (config.usePageTransitions) {
-                recycler.smoothScrollBy(0, scrollDistance)
-            } else {
-                recycler.scrollBy(0, scrollDistance)
-            }
+    private fun scrollDown(speed: Float = 0.75f) {
+        if (config.usePageTransitions) {
+            recycler.smoothScrollBy(0, (baseScrollDistance*speed).toInt())
+
+        } else {
+            recycler.scrollBy(0, (baseScrollDistance*speed).toInt())
+
         }
     }
 
@@ -336,8 +335,25 @@ class WebtoonViewer(val activity: ReaderActivity, val isContinuous: Boolean = tr
     override fun handleKeyEvent(event: KeyEvent, isLongPress:Int): Boolean {
         val isUp = event.action == KeyEvent.ACTION_UP
 
-
-
+        val actionsWithParams = keybind[event.keyCode]
+        if(actionsWithParams != null){
+            when(isLongPress){
+                0 ->{
+                    println("OptionTest: 1")
+                    invokeFunctionByName(actionsWithParams.shortClickFunctionName, actionsWithParams.shortClickParameter)
+                }
+                1 ->{
+                    println("OptionTest: 2")
+                    //recycler.startContinuousScroll(0.5f)//event.keyCode,
+                    invokeFunctionByName(actionsWithParams.longClickFunctionName, actionsWithParams.longClickParameter)
+                }
+                2 ->{
+                    //recycler.stopContinuousScroll()
+                    invokeFunctionByName(actionsWithParams.longReleaseFunctionName, actionsWithParams.longReleaseParameter)
+                    println("OptionTest: 3")
+                }
+            }
+        }
 
         // Handle specific key events
         when (event.keyCode) {
@@ -355,40 +371,40 @@ class WebtoonViewer(val activity: ReaderActivity, val isContinuous: Boolean = tr
                     if (!config.volumeKeysInverted) scrollUp() else scrollDown()
                 }
             }
-            KeyEvent.KEYCODE_S ->{
-                when(isLongPress){
-                    0 ->{
-                        println("OptionTest: 1")
-                        scrollDown()
-                    }
-                    1 ->{
-                        println("OptionTest: 2")
-                        recycler.startContinuousScroll(event.keyCode,0.5f)
-                    }
-                    2 ->{
-                        recycler.stopContinuousScroll()
-                        println("OptionTest: 3")
-                    }
-                }
-
-            }
-            KeyEvent.KEYCODE_W ->{
-                when(isLongPress){
-                    0 ->{
-                        println("OptionTest: 1")
-                        scrollUp()
-                    }
-                    1 ->{
-                        println("OptionTest: 2")
-                        recycler.startContinuousScroll(event.keyCode,-0.5f)
-                    }
-                    2 ->{
-                        recycler.stopContinuousScroll()
-                        println("OptionTest: 3")
-                    }
-                }
-
-            }
+//            KeyEvent.KEYCODE_S ->{
+//                when(isLongPress){
+//                    0 ->{
+//                        println("OptionTest: 1")
+//                        scrollDown()
+//                    }
+//                    1 ->{
+//                        println("OptionTest: 2")
+//                        recycler.startContinuousScroll(0.5f)//event.keyCode,
+//                    }
+//                    2 ->{
+//                        recycler.stopContinuousScroll(0f)
+//                        println("OptionTest: 3")
+//                    }
+//                }
+//
+//            }
+//            KeyEvent.KEYCODE_W ->{
+//                when(isLongPress){
+//                    0 ->{
+//                        println("OptionTest: 1")
+//                        scrollUp()
+//                    }
+//                    1 ->{
+//                        println("OptionTest: 2")
+//                        recycler.startContinuousScroll(-0.5f)//event.keyCode,
+//                    }
+//                    2 ->{
+//                        recycler.stopContinuousScroll(0f)
+//                        println("OptionTest: 3")
+//                    }
+//                }
+//
+//            }
 
             KeyEvent.KEYCODE_MENU -> if (isUp) activity.toggleMenu()
 
@@ -397,7 +413,7 @@ class WebtoonViewer(val activity: ReaderActivity, val isContinuous: Boolean = tr
             -> if (isUp) scrollUp()
 
             KeyEvent.KEYCODE_DPAD_UP,
-            -> if (isUp) scrollUp(true)
+            -> if (isUp) scrollUp((scrollAmount/20).toFloat())
 
             KeyEvent.KEYCODE_DPAD_RIGHT,
             KeyEvent.KEYCODE_PAGE_DOWN,
@@ -413,7 +429,9 @@ class WebtoonViewer(val activity: ReaderActivity, val isContinuous: Boolean = tr
         }
         return true
     }
-
+    fun invokeFunctionByName(functionName: String, parameter: Float) {
+        functionMap[functionName]?.invoke(parameter) ?: println("Function $functionName not found.")
+    }
     /**
      * Called from the containing activity when a generic motion [event] is received. It should
      * return true if the event was handled, false otherwise.

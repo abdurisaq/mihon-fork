@@ -1,8 +1,11 @@
 package eu.kanade.tachiyomi.ui.reader.setting
 
 import android.os.Build
+import android.view.KeyEvent
 import androidx.compose.ui.graphics.BlendMode
 import dev.icerock.moko.resources.StringResource
+import eu.kanade.presentation.more.settings.KeybindAction
+import eu.kanade.presentation.more.settings.KeybindActionSerializer
 import tachiyomi.core.common.preference.PreferenceStore
 import tachiyomi.core.common.preference.getEnum
 import tachiyomi.i18n.MR
@@ -69,6 +72,13 @@ class ReaderPreferences(
     fun webtoonScrollDistance() = preferenceStore.getInt("webtoon_scroll_distance", WEBTOON_SCROLLING_MIN)
 
     fun variableStepScrolling() = preferenceStore.getBoolean("variable_step_scrolling", false)
+
+    fun keybinds() = preferenceStore.getObject(
+        "pref_keybinding",
+        KeybindAction.defaultKeybindings(),  // Fallback to default keybindings
+        { keybindingMap -> KeybindActionSerializer.serializeKeybindActionMap(keybindingMap) }, // Serializer function
+        { serialized -> KeybindActionSerializer.deserializeKeybindActionMap(serialized) }      // Deserializer function
+    )
 
     fun readerHideThreshold() = preferenceStore.getEnum("reader_hide_threshold", ReaderHideThreshold.LOW)
 

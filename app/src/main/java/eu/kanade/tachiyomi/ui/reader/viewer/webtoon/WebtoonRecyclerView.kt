@@ -104,7 +104,7 @@ class WebtoonRecyclerView @JvmOverloads constructor(
         return positionY.coerceIn(-maxPositionY, maxPositionY)
     }
 
-    fun startContinuousScroll(keyCode: Int,speed: Float) {
+    fun startContinuousScroll(speed: Float) {//keyCode: Int,
 
         stopScroll()
 
@@ -129,13 +129,13 @@ class WebtoonRecyclerView @JvmOverloads constructor(
 
         layoutManager?.startSmoothScroll(smoothScroller)
 
-        currentScrollingKeyCode = keyCode
+        //currentScrollingKeyCode = keyCode
     }
-    fun stopContinuousScroll() {
+    fun stopContinuousScroll(placeholder: Float) {
         scrollAnimator?.cancel() // Cancel the animator
         stopScroll()
         scrollAnimator = null // Reset the animator
-        currentScrollingKeyCode = null // Clear the key code
+        //currentScrollingKeyCode = null // Clear the key code
     }
 
     private fun zoom(

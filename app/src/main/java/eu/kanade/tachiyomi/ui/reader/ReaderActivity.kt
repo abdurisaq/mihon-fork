@@ -140,6 +140,10 @@ class ReaderActivity : BaseActivity() {
         private set
 
     private var isLongPress = 0
+    private val keybind =
+        Injekt.get<ReaderPreferences>()
+            .keybinds()
+            .get()
     /**
      * Called when the activity is created. Initializes the presenter and configuration.
      */
@@ -301,13 +305,13 @@ class ReaderActivity : BaseActivity() {
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
-        if(keyCode ==KeyEvent.KEYCODE_S){
-            event.startTracking()
-            return true
-        }else if(keyCode ==KeyEvent.KEYCODE_W){
+
+        val action = keybind[keyCode]
+        if (action != null && action.longClickFunctionName != "N/A") {
             event.startTracking()
             return true
         }
+
         return super.onKeyDown(keyCode, event)
     }
     override fun onKeyUp(keyCode: Int, event: KeyEvent): Boolean {
@@ -320,49 +324,70 @@ class ReaderActivity : BaseActivity() {
                 loadPreviousChapter()
                 return true
             }
-            KeyEvent.KEYCODE_S ->{
-                if(isLongPress == 0) {
 
-                    println("short press scroll")
-                    viewModel.state.value.viewer?.handleKeyEvent(event,0)
-                }else{
-                    println("long press release")
-
-                    viewModel.state.value.viewer?.handleKeyEvent(event,2)
-                }
-                isLongPress =0
-                return true
-            }
-            KeyEvent.KEYCODE_W ->{
-                if(isLongPress == 0) {
-
-                    println("short press scroll")
-                    viewModel.state.value.viewer?.handleKeyEvent(event,0)
-                }else{
-                    println("long press release")
-
-                    viewModel.state.value.viewer?.handleKeyEvent(event,2)
-                }
-                isLongPress =0
-                return true
-            }
-            else -> return super.onKeyUp(keyCode, event)
         }
+        val action = keybind[keyCode]
+        if (action != null && action.longClickFunctionName != "N/A") {
+            if(isLongPress == 0) {
+                println("short press scroll")
+                viewModel.state.value.viewer?.handleKeyEvent(event,0)
+            }else{
+                println("long press release")
 
+                viewModel.state.value.viewer?.handleKeyEvent(event,2)
+            }
+            isLongPress =0
+            return true
+        }
+//        KeyEvent.KEYCODE_S ->{
+//            if(isLongPress == 0) {
+//
+//                println("short press scroll")
+//                viewModel.state.value.viewer?.handleKeyEvent(event,0)
+//            }else{
+//                println("long press release")
+//
+//                viewModel.state.value.viewer?.handleKeyEvent(event,2)
+//            }
+//            isLongPress =0
+//            return true
+//        }
+//        KeyEvent.KEYCODE_W ->{
+//            if(isLongPress == 0) {
+//
+//                println("short press scroll")
+//                viewModel.state.value.viewer?.handleKeyEvent(event,0)
+//            }else{
+//                println("long press release")
+//
+//                viewModel.state.value.viewer?.handleKeyEvent(event,2)
+//            }
+//            isLongPress =0
+//            return true
+//        }
+//        else -> return super.onKeyUp(keyCode, event)
+        return super.onKeyUp(keyCode, event)
     }
 
     override fun onKeyLongPress(keyCode: Int, event: KeyEvent): Boolean {
-        if(keyCode ==KeyEvent.KEYCODE_S){
-            println("long press scroll")
-            isLongPress = 1
-            viewModel.state.value.viewer?.handleKeyEvent(event,1)
-            return true
-        }else if(keyCode ==KeyEvent.KEYCODE_W){
+        val action = keybind[keyCode]
+        if (action != null && action.longClickFunctionName != "N/A") {
             println("long press scroll")
             isLongPress = 1
             viewModel.state.value.viewer?.handleKeyEvent(event,1)
             return true
         }
+//        if(keyCode ==KeyEvent.KEYCODE_S){
+//            println("long press scroll")
+//            isLongPress = 1
+//            viewModel.state.value.viewer?.handleKeyEvent(event,1)
+//            return true
+//        }else if(keyCode ==KeyEvent.KEYCODE_W){
+//            println("long press scroll")
+//            isLongPress = 1
+//            viewModel.state.value.viewer?.handleKeyEvent(event,1)
+//            return true
+//        }
         return super.onKeyLongPress(keyCode, event)
     }
     /**
