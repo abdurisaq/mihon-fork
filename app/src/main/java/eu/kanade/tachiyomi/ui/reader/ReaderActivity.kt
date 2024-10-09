@@ -17,6 +17,7 @@ import android.os.Bundle
 import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View.LAYER_TYPE_HARDWARE
+import android.view.ViewConfiguration.getLongPressTimeout
 import android.view.WindowManager
 import android.widget.Toast
 import androidx.activity.viewModels
@@ -305,7 +306,7 @@ class ReaderActivity : BaseActivity() {
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
-
+        println("keycode: $keyCode")
         val action = keybind[keyCode]
         if (action != null && action.longClickFunctionName != "N/A") {
             event.startTracking()
@@ -327,7 +328,7 @@ class ReaderActivity : BaseActivity() {
 
         }
         val action = keybind[keyCode]
-        if (action != null && action.longClickFunctionName != "N/A") {
+        if (action != null ) {
             if(isLongPress == 0) {
                 println("short press scroll")
                 viewModel.state.value.viewer?.handleKeyEvent(event,0)
@@ -339,55 +340,20 @@ class ReaderActivity : BaseActivity() {
             isLongPress =0
             return true
         }
-//        KeyEvent.KEYCODE_S ->{
-//            if(isLongPress == 0) {
-//
-//                println("short press scroll")
-//                viewModel.state.value.viewer?.handleKeyEvent(event,0)
-//            }else{
-//                println("long press release")
-//
-//                viewModel.state.value.viewer?.handleKeyEvent(event,2)
-//            }
-//            isLongPress =0
-//            return true
-//        }
-//        KeyEvent.KEYCODE_W ->{
-//            if(isLongPress == 0) {
-//
-//                println("short press scroll")
-//                viewModel.state.value.viewer?.handleKeyEvent(event,0)
-//            }else{
-//                println("long press release")
-//
-//                viewModel.state.value.viewer?.handleKeyEvent(event,2)
-//            }
-//            isLongPress =0
-//            return true
-//        }
-//        else -> return super.onKeyUp(keyCode, event)
+
         return super.onKeyUp(keyCode, event)
     }
 
     override fun onKeyLongPress(keyCode: Int, event: KeyEvent): Boolean {
         val action = keybind[keyCode]
+        println("long timeout : ${getLongPressTimeout()}")
         if (action != null && action.longClickFunctionName != "N/A") {
             println("long press scroll")
             isLongPress = 1
             viewModel.state.value.viewer?.handleKeyEvent(event,1)
             return true
         }
-//        if(keyCode ==KeyEvent.KEYCODE_S){
-//            println("long press scroll")
-//            isLongPress = 1
-//            viewModel.state.value.viewer?.handleKeyEvent(event,1)
-//            return true
-//        }else if(keyCode ==KeyEvent.KEYCODE_W){
-//            println("long press scroll")
-//            isLongPress = 1
-//            viewModel.state.value.viewer?.handleKeyEvent(event,1)
-//            return true
-//        }
+
         return super.onKeyLongPress(keyCode, event)
     }
     /**

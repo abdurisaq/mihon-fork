@@ -122,16 +122,60 @@ class WebtoonRecyclerView @JvmOverloads constructor(
         }
 
         smoothScroller.targetPosition = if (speed < 0) {
-            0  // Scroll to the top if speed is negative
+            0
         } else {
-            adapter?.itemCount?.minus(1) ?: 0  // Scroll to the bottom if speed is positive
+            adapter?.itemCount?.minus(1) ?: 0
         }
 
         layoutManager?.startSmoothScroll(smoothScroller)
 
-        //currentScrollingKeyCode = keyCode
     }
-    fun stopContinuousScroll(placeholder: Float) {
+    fun smoothScrollBackward(speed: Float) {
+
+        stopScroll()
+
+        val displayMetrics = context.resources.displayMetrics
+        val recyclerViewHeight = displayMetrics.heightPixels
+
+        val scrollSpeed = (recyclerViewHeight * abs(speed)).toInt()
+
+
+        val smoothScroller = object : LinearSmoothScroller(context) {
+            override fun calculateSpeedPerPixel(displayMetrics: android.util.DisplayMetrics): Float {
+
+                return (1000f / scrollSpeed)
+            }
+        }
+
+        smoothScroller.targetPosition = 0
+
+        layoutManager?.startSmoothScroll(smoothScroller)
+
+    }
+
+    fun smoothScrollForward(speed: Float) {
+
+        stopScroll()
+
+        val displayMetrics = context.resources.displayMetrics
+        val recyclerViewHeight = displayMetrics.heightPixels
+
+        val scrollSpeed = (recyclerViewHeight * abs(speed)).toInt()
+
+
+        val smoothScroller = object : LinearSmoothScroller(context) {
+            override fun calculateSpeedPerPixel(displayMetrics: android.util.DisplayMetrics): Float {
+
+                return (1000f / scrollSpeed)
+            }
+        }
+
+        smoothScroller.targetPosition = adapter?.itemCount?.minus(1) ?: 0
+
+        layoutManager?.startSmoothScroll(smoothScroller)
+
+    }
+    fun stopContinuousScroll() {
         scrollAnimator?.cancel() // Cancel the animator
         stopScroll()
         scrollAnimator = null // Reset the animator

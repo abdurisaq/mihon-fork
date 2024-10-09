@@ -90,13 +90,6 @@ class WebtoonViewer(val activity: ReaderActivity, val isContinuous: Boolean = tr
     private val arrowKeyScrollDistance = activity.resources.displayMetrics.heightPixels * (scrollAmount)/20
     private val baseScrollDistance = activity.resources.displayMetrics.heightPixels
 
-    private val functionMap: Map<String, (Float) -> Unit> = mapOf(
-        "scrollUp" to ::scrollUp,
-        "scrollDown" to ::scrollDown,
-        "startContinuousScroll" to recycler::startContinuousScroll,
-        "stopContinuousScroll" to recycler::stopContinuousScroll
-
-    )
 
     init {
         recycler.setItemViewCacheSize(RECYCLER_VIEW_CACHE_SIZE)
@@ -336,101 +329,67 @@ class WebtoonViewer(val activity: ReaderActivity, val isContinuous: Boolean = tr
         val isUp = event.action == KeyEvent.ACTION_UP
 
         val actionsWithParams = keybind[event.keyCode]
+        var modifier = 0
         if(actionsWithParams != null){
+            if(event.keyCode ==KeyEvent.KEYCODE_VOLUME_DOWN || event.keyCode ==KeyEvent.KEYCODE_VOLUME_UP){
+                if(!config.volumeKeysEnabled || activity.viewModel.state.value.menuVisible) {
+                    return false
+                }
+                if(config.volumeKeysInverted){
+                    modifier =1
+                }
+            }
             when(isLongPress){
                 0 ->{
                     println("OptionTest: 1")
-                    invokeFunctionByName(actionsWithParams.shortClickFunctionName, actionsWithParams.shortClickParameter)
+                    invokeFunctionByName(actionsWithParams.shortClickFunctionName, actionsWithParams.shortClickParameter,modifier)
                 }
                 1 ->{
                     println("OptionTest: 2")
                     //recycler.startContinuousScroll(0.5f)//event.keyCode,
-                    invokeFunctionByName(actionsWithParams.longClickFunctionName, actionsWithParams.longClickParameter)
+                    invokeFunctionByName(actionsWithParams.longClickFunctionName, actionsWithParams.longClickParameter,modifier)
                 }
                 2 ->{
                     //recycler.stopContinuousScroll()
-                    invokeFunctionByName(actionsWithParams.longReleaseFunctionName, actionsWithParams.longReleaseParameter)
+                    invokeFunctionByName(actionsWithParams.longReleaseFunctionName, actionsWithParams.longReleaseParameter,modifier)
                     println("OptionTest: 3")
                 }
             }
         }
 
-        // Handle specific key events
-        when (event.keyCode) {
-            KeyEvent.KEYCODE_VOLUME_DOWN -> {
-                if (!config.volumeKeysEnabled || activity.viewModel.state.value.menuVisible) {
-                    return false
-                } else if (isUp) {
-                    if (!config.volumeKeysInverted) scrollDown() else scrollUp()
-                }
-            }
-            KeyEvent.KEYCODE_VOLUME_UP -> {
-                if (!config.volumeKeysEnabled || activity.viewModel.state.value.menuVisible) {
-                    return false
-                } else if (isUp) {
-                    if (!config.volumeKeysInverted) scrollUp() else scrollDown()
-                }
-            }
-//            KeyEvent.KEYCODE_S ->{
-//                when(isLongPress){
-//                    0 ->{
-//                        println("OptionTest: 1")
-//                        scrollDown()
-//                    }
-//                    1 ->{
-//                        println("OptionTest: 2")
-//                        recycler.startContinuousScroll(0.5f)//event.keyCode,
-//                    }
-//                    2 ->{
-//                        recycler.stopContinuousScroll(0f)
-//                        println("OptionTest: 3")
-//                    }
-//                }
-//
-//            }
-//            KeyEvent.KEYCODE_W ->{
-//                when(isLongPress){
-//                    0 ->{
-//                        println("OptionTest: 1")
-//                        scrollUp()
-//                    }
-//                    1 ->{
-//                        println("OptionTest: 2")
-//                        recycler.startContinuousScroll(-0.5f)//event.keyCode,
-//                    }
-//                    2 ->{
-//                        recycler.stopContinuousScroll(0f)
-//                        println("OptionTest: 3")
-//                    }
-//                }
-//
-//            }
-
-            KeyEvent.KEYCODE_MENU -> if (isUp) activity.toggleMenu()
-
-            KeyEvent.KEYCODE_DPAD_LEFT,
-            KeyEvent.KEYCODE_PAGE_UP,
-            -> if (isUp) scrollUp()
-
-            KeyEvent.KEYCODE_DPAD_UP,
-            -> if (isUp) scrollUp((scrollAmount/20).toFloat())
-
-            KeyEvent.KEYCODE_DPAD_RIGHT,
-            KeyEvent.KEYCODE_PAGE_DOWN,
-            -> if (isUp) scrollDown()
-
-            KeyEvent.KEYCODE_SPACE,
-            -> if (isUp) scrollDown()
-
-            KeyEvent.KEYCODE_DPAD_DOWN,
-            -> if (isUp) scrollDown()
-
-            else -> return false
-        }
         return true
     }
-    fun invokeFunctionByName(functionName: String, parameter: Float) {
-        functionMap[functionName]?.invoke(parameter) ?: println("Function $functionName not found.")
+    private val functionMapFloat: Map<String, (Float) -> Unit> = mapOf(
+        "moveBackward" to ::scrollUp,
+        "moveForward" to ::scrollDown,
+        "smoothScrollBackward" to recycler::smoothScrollBackward,
+        "smoothScrollForward" to recycler::smoothScrollForward,
+        "startContinuousScroll" to recycler::startContinuousScroll
+
+    )
+    private val functionMapNoParam: Map<String, () -> Unit> = mapOf(
+        "stopContinuousScroll" to recycler::stopContinuousScroll,
+        "toggleMenu" to activity::toggleMenu,
+    )
+    private val functionMapInverted: Map<String, (Float) -> Unit> = mapOf(
+        "moveBackward" to ::scrollDown,
+        "moveForward" to ::scrollUp,
+        "smoothScrollBackward" to recycler::smoothScrollForward,
+        "smoothScrollForward" to recycler::smoothScrollBackward
+    )
+    private val functionMapInvertedNoParam: Map<String, () -> Unit> = mapOf(
+        "stopContinuousScroll" to recycler::stopContinuousScroll,
+        "toggleMenu" to activity::toggleMenu,
+    )
+
+    private fun invokeFunctionByName(functionName: String, parameter: Float,modifier:Int) {
+        if(modifier ==1){
+            functionMapInverted[functionName]?.invoke(parameter) ?: functionMapInvertedNoParam[functionName]?.invoke() ?:println("Function $functionName not found.")
+
+        }else{
+            functionMapFloat[functionName]?.invoke(parameter) ?: functionMapNoParam[functionName]?.invoke() ?:println("Function $functionName not found.")
+        }
+
     }
     /**
      * Called from the containing activity when a generic motion [event] is received. It should

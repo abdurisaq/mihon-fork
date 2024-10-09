@@ -22,6 +22,7 @@ interface Preference<T> {
 
     fun stateIn(scope: CoroutineScope): StateFlow<T>
 
+
     companion object {
         /**
          * A preference that should not be exposed in places like backups without user consent.

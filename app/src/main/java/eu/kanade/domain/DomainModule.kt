@@ -23,6 +23,11 @@ import eu.kanade.domain.track.interactor.AddTracks
 import eu.kanade.domain.track.interactor.RefreshTracks
 import eu.kanade.domain.track.interactor.SyncChapterProgressWithTrack
 import eu.kanade.domain.track.interactor.TrackChapter
+import eu.kanade.presentation.more.settings.screen.reader.keybind.interactor.CreateKeybind
+import eu.kanade.presentation.more.settings.screen.reader.keybind.interactor.DeleteKeybind
+import eu.kanade.presentation.more.settings.screen.reader.keybind.interactor.GetKeybinds
+import eu.kanade.presentation.more.settings.screen.reader.keybind.interactor.RebindKeybind
+import eu.kanade.tachiyomi.ui.category.CategoryDialog
 import mihon.data.repository.ExtensionRepoRepositoryImpl
 import mihon.domain.chapter.interactor.FilterChaptersForDownload
 import mihon.domain.extensionrepo.interactor.CreateExtensionRepo
@@ -91,6 +96,7 @@ import tachiyomi.domain.track.interactor.InsertTrack
 import tachiyomi.domain.track.repository.TrackRepository
 import tachiyomi.domain.updates.interactor.GetUpdates
 import tachiyomi.domain.updates.repository.UpdatesRepository
+import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.InjektModule
 import uy.kohesive.injekt.api.InjektRegistrar
 import uy.kohesive.injekt.api.addFactory
@@ -110,6 +116,11 @@ class DomainModule : InjektModule {
         addFactory { ReorderCategory(get()) }
         addFactory { UpdateCategory(get()) }
         addFactory { DeleteCategory(get()) }
+
+        addFactory{CreateKeybind() }
+        addFactory{DeleteKeybind()}
+        addFactory{RebindKeybind()}
+        addFactory{GetKeybinds()}
 
         addSingletonFactory<MangaRepository> { MangaRepositoryImpl(get()) }
         addFactory { GetDuplicateLibraryManga(get()) }

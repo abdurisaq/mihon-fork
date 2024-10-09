@@ -17,11 +17,14 @@ import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
 import eu.kanade.tachiyomi.ui.reader.model.InsertPage
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
+import eu.kanade.tachiyomi.ui.reader.setting.ReaderPreferences
 import eu.kanade.tachiyomi.ui.reader.viewer.Viewer
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation.NavigationRegion
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import tachiyomi.core.common.util.system.logcat
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 import kotlin.math.min
 
@@ -61,6 +64,12 @@ abstract class PagerViewer(val activity: ReaderActivity) : Viewer {
      * or dragging, there'd be a noticeable and annoying jump.
      */
     private var awaitingIdleViewerChapters: ViewerChapters? = null
+
+    private val keybind =
+        Injekt.get<ReaderPreferences>()
+            .keybinds()
+            .get()
+
 
     /**
      * Whether the view pager is currently in idle mode. It sets the awaiting chapters if setting
@@ -379,40 +388,75 @@ abstract class PagerViewer(val activity: ReaderActivity) : Viewer {
     override fun handleKeyEvent(event: KeyEvent,isLongPress:Int): Boolean {
         val isUp = event.action == KeyEvent.ACTION_UP
         val ctrlPressed = event.metaState.and(KeyEvent.META_CTRL_ON) > 0
-
-        when (event.keyCode) {
-            KeyEvent.KEYCODE_VOLUME_DOWN -> {
-                if (!config.volumeKeysEnabled || activity.viewModel.state.value.menuVisible) {
+        var modifier = if (event.metaState.and(KeyEvent.META_CTRL_ON) > 0) 2 else 0
+        val actionsWithParams = keybind[event.keyCode]
+        if(actionsWithParams != null){
+            if(event.keyCode ==KeyEvent.KEYCODE_VOLUME_DOWN || event.keyCode ==KeyEvent.KEYCODE_VOLUME_UP){
+                if(!config.volumeKeysEnabled || activity.viewModel.state.value.menuVisible) {
                     return false
-                } else if (isUp) {
-                    if (!config.volumeKeysInverted) moveDown() else moveUp()
+                }
+                if(config.volumeKeysInverted){
+                    modifier =1
                 }
             }
-            KeyEvent.KEYCODE_VOLUME_UP -> {
-                if (!config.volumeKeysEnabled || activity.viewModel.state.value.menuVisible) {
-                    return false
-                } else if (isUp) {
-                    if (!config.volumeKeysInverted) moveUp() else moveDown()
-                }
-            }
-            KeyEvent.KEYCODE_DPAD_RIGHT -> {
-                if (isUp) {
-                    if (ctrlPressed) moveToNext() else moveRight()
-                }
-            }
-            KeyEvent.KEYCODE_DPAD_LEFT -> {
-                if (isUp) {
-                    if (ctrlPressed) moveToPrevious() else moveLeft()
-                }
-            }
-            KeyEvent.KEYCODE_DPAD_DOWN -> if (isUp) moveDown()
-            KeyEvent.KEYCODE_DPAD_UP -> if (isUp) moveUp()
-            KeyEvent.KEYCODE_PAGE_DOWN -> if (isUp) moveDown()
-            KeyEvent.KEYCODE_PAGE_UP -> if (isUp) moveUp()
-            KeyEvent.KEYCODE_MENU -> if (isUp) activity.toggleMenu()
-            else -> return false
+            invokeFunctionByName(actionsWithParams.shortClickFunctionName, actionsWithParams.shortClickParameter,modifier)
         }
+
+//        when (event.keyCode) {
+//            KeyEvent.KEYCODE_VOLUME_DOWN -> {
+//                if (!config.volumeKeysEnabled || activity.viewModel.state.value.menuVisible) {
+//                    return false
+//                } else if (isUp) {
+//                    if (!config.volumeKeysInverted) moveDown() else moveUp()
+//                }
+//            }
+//            KeyEvent.KEYCODE_VOLUME_UP -> {
+//                if (!config.volumeKeysEnabled || activity.viewModel.state.value.menuVisible) {
+//                    return false
+//                } else if (isUp) {
+//                    if (!config.volumeKeysInverted) moveUp() else moveDown()
+//                }
+//            }
+//            KeyEvent.KEYCODE_DPAD_RIGHT -> {
+//                if (isUp) {
+//                    if (ctrlPressed) moveToNext() else moveRight()
+//                }
+//            }
+//            KeyEvent.KEYCODE_DPAD_LEFT -> {
+//                if (isUp) {
+//                    if (ctrlPressed) moveToPrevious() else moveLeft()
+//                }
+//            }
+//            KeyEvent.KEYCODE_DPAD_DOWN -> if (isUp) moveDown()
+//            KeyEvent.KEYCODE_DPAD_UP -> if (isUp) moveUp()
+//            KeyEvent.KEYCODE_PAGE_DOWN -> if (isUp) moveDown()
+//            KeyEvent.KEYCODE_PAGE_UP -> if (isUp) moveUp()
+//            KeyEvent.KEYCODE_MENU -> if (isUp) activity.toggleMenu()
+//            else -> return false
+//        }
         return true
+    }
+    private val functionMapNoParam: Map<String, () -> Unit> = mapOf(
+        "moveBackward" to ::moveToPrevious,
+        "moveForward" to ::moveToNext,
+        "toggleMenu" to activity::toggleMenu,
+        )
+
+    private val functionMapInverted: Map<String, () -> Unit> = mapOf(
+        "moveBackward" to ::moveToNext,
+        "moveForward" to ::moveToPrevious,
+    )
+    private val functionMapCtrlAlternate: Map<String, () -> Unit> = mapOf(
+        "moveBackward" to ::moveRight,
+        "moveForward" to ::moveLeft,
+    )
+
+    private fun invokeFunctionByName(functionName: String, parameter: Float,modifier:Int) {
+        when(modifier){
+            1 -> functionMapInverted[functionName]?.invoke() ?:println("Function $functionName not found.")
+            2 -> functionMapCtrlAlternate[functionName]?.invoke() ?:println("Function $functionName not found.")
+            else -> functionMapNoParam[functionName]?.invoke() ?:println("Function $functionName not found.")
+        }
     }
 
     /**

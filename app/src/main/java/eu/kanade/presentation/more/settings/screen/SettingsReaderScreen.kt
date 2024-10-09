@@ -1,14 +1,18 @@
 package eu.kanade.presentation.more.settings.screen
 
 import android.os.Build
-import android.view.KeyEvent
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalView
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import eu.kanade.presentation.more.settings.KeybindAction
+import eu.kanade.presentation.more.settings.KeybindActionSerializer
 import eu.kanade.presentation.more.settings.Preference
+import eu.kanade.presentation.more.settings.screen.reader.KeyboardBindingScreen
 import eu.kanade.tachiyomi.ui.reader.setting.ReaderOrientation
 import eu.kanade.tachiyomi.ui.reader.setting.ReaderPreferences
 import eu.kanade.tachiyomi.ui.reader.setting.ReadingMode
@@ -324,21 +328,13 @@ object SettingsReaderScreen : SearchableSettings {
         val dualPageSplitPref = readerPreferences.dualPageSplitWebtoon()
         val rotateToFitPref = readerPreferences.dualPageRotateToFitWebtoon()
         val webtoonSidePaddingPref = readerPreferences.webtoonSidePadding()
-        val webtoonScrollDistancePref = readerPreferences.webtoonScrollDistance()
-        val variableStepScrollingPref = readerPreferences.variableStepScrolling()
+
 
 
         val navMode by navModePref.collectAsState()
         val dualPageSplit by dualPageSplitPref.collectAsState()
         val rotateToFit by rotateToFitPref.collectAsState()
         val webtoonSidePadding by webtoonSidePaddingPref.collectAsState()
-        val webtoonScrollDistance by webtoonScrollDistancePref.collectAsState()
-        val variableStepScrolling by variableStepScrollingPref.collectAsState()
-
-
-        if(!variableStepScrolling){
-            webtoonScrollDistancePref.set(10)
-        }
 
         return Preference.PreferenceGroup(
             title = stringResource(MR.strings.webtoon_viewer),
@@ -374,27 +370,6 @@ object SettingsReaderScreen : SearchableSettings {
                         webtoonSidePaddingPref.set(it)
                         true
                     },
-                ),
-                //Variable Step Scrolling
-                Preference.PreferenceItem.SwitchPreference(
-                    pref = readerPreferences.variableStepScrolling(),
-                    //title = "Variable Step Scrolling",//another placeholder until I know how to use stringResource
-                    title = stringResource(MR.strings.pref_webtoon_variable_step_scrolling),
-                ),
-//                <string name="pref_webtoon_variable_step_scrolling">Variable step scrolling</string>
-//                <string name="pref_webtoon_scroll_amount">Scroll amount</string>
-                Preference.PreferenceItem.SliderPreference(
-                    value = webtoonScrollDistance,
-                    //title = "Scroll Amount", //placeholder because I don't know how each language part is generated
-                    title = stringResource(MR.strings.pref_webtoon_scroll_amount),
-                    subtitle = numberFormat.format(webtoonScrollDistance / 20f),
-                    min = ReaderPreferences.WEBTOON_SCROLLING_MIN,
-                    max = ReaderPreferences.WEBTOON_SCROLLING_MAX,
-                    onValueChanged = {
-                        webtoonScrollDistancePref.set(it)
-                        true
-                    },
-                    enabled = variableStepScrolling,
                 ),
                 Preference.PreferenceItem.ListPreference(
                     pref = readerPreferences.readerHideThreshold(),
@@ -451,8 +426,22 @@ object SettingsReaderScreen : SearchableSettings {
 
     @Composable
     private fun getNavigationGroup(readerPreferences: ReaderPreferences): Preference.PreferenceGroup {
+        val scope = rememberCoroutineScope()
+
+
         val readWithVolumeKeysPref = readerPreferences.readWithVolumeKeys()
+        val keyboardSupportPref = readerPreferences.variableStepScrolling()
+        val keybindingsPref = readerPreferences.keybinds()
+
+
         val readWithVolumeKeys by readWithVolumeKeysPref.collectAsState()
+        val keyboardSupport by keyboardSupportPref.collectAsState()
+        val keybinding by keybindingsPref.collectAsState()
+        val navigator = LocalNavigator.currentOrThrow
+
+        if(!keyboardSupport){
+            keybindingsPref.set(KeybindAction.defaultKeybindings())
+        }
         return Preference.PreferenceGroup(
             title = stringResource(MR.strings.pref_reader_navigation),
             preferenceItems = persistentListOf(
@@ -464,6 +453,22 @@ object SettingsReaderScreen : SearchableSettings {
                     pref = readerPreferences.readWithVolumeKeysInverted(),
                     title = stringResource(MR.strings.pref_read_with_volume_keys_inverted),
                     enabled = readWithVolumeKeys,
+                ),
+                Preference.PreferenceItem.SwitchPreference(
+                    pref = readerPreferences.variableStepScrolling(),
+                    title = stringResource(MR.strings.pref_webtoon_variable_step_scrolling),
+                ),
+                Preference.PreferenceItem.TextPreference(
+                    title = "Keyboard support",
+                    onClick = {
+                        navigator.push(KeyboardBindingScreen())
+                    },
+                    enabled = keyboardSupport,
+                    onValueChanged = { newValue ->
+                        val newKeybindings: Map<Int, KeybindAction> = KeybindActionSerializer.deserializeKeybindActionMap(newValue)
+                        keybindingsPref.set(newKeybindings)
+                        true
+                    }
                 ),
             ),
         )
@@ -488,3 +493,4 @@ object SettingsReaderScreen : SearchableSettings {
         )
     }
 }
+
