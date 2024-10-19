@@ -85,7 +85,7 @@ class WebtoonViewer(val activity: ReaderActivity, val isContinuous: Boolean = tr
 
     private val keybind =
         Injekt.get<ReaderPreferences>()
-            .keybinds()
+            .keybindings()
             .get()
     private val arrowKeyScrollDistance = activity.resources.displayMetrics.heightPixels * (scrollAmount)/20
     private val baseScrollDistance = activity.resources.displayMetrics.heightPixels

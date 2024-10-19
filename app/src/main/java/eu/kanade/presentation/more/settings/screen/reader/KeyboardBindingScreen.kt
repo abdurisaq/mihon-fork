@@ -9,18 +9,15 @@ import androidx.compose.ui.platform.LocalContext
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import eu.kanade.presentation.more.settings.KeybindAction
 import eu.kanade.presentation.more.settings.screen.reader.components.KeybindCreateDialog
 import eu.kanade.presentation.more.settings.screen.reader.components.KeybindDeleteDialog
 import eu.kanade.presentation.more.settings.screen.reader.components.KeybindRebindDialog
 import eu.kanade.presentation.more.settings.screen.reader.components.KeyboardBindingScreen
 import eu.kanade.presentation.util.Screen
-import eu.kanade.tachiyomi.ui.reader.setting.ReaderPreferences
 import eu.kanade.tachiyomi.util.system.toast
+import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.flow.collectLatest
 import tachiyomi.presentation.core.screens.LoadingScreen
-import uy.kohesive.injekt.Injekt
-import uy.kohesive.injekt.api.get
 
 class KeyboardBindingScreen(
 ) : Screen() {
@@ -55,7 +52,8 @@ class KeyboardBindingScreen(
             KeybindDialog.Create -> {
                 KeybindCreateDialog(
                     onDismissRequest = screenModel::dismissDialog,
-                    onCreate = screenModel::createKeybind
+                    onCreate = screenModel::createKeybind,
+                    keybindings = successState.currentKeybindings.toImmutableMap()
                 )
             }
             is KeybindDialog.Rename -> {

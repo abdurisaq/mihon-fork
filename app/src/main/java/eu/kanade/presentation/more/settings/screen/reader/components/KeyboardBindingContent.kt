@@ -20,30 +20,21 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import eu.kanade.presentation.more.settings.KeybindAction
-import eu.kanade.tachiyomi.ui.reader.setting.ReaderPreferences
-import kotlinx.collections.immutable.ImmutableMap
+import eu.kanade.presentation.more.settings.screen.reader.keybind.model.KeybindAction
+import eu.kanade.presentation.more.settings.screen.reader.keybind.model.getKeyCodeName
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.i18n.stringResource
-import uy.kohesive.injekt.Injekt
-import uy.kohesive.injekt.api.get
 
 @Composable
 fun KeyboardBindingContent(
     lazyListState: LazyListState,
     paddingValues: PaddingValues,
-    keybindings: MutableMap<Int,KeybindAction>,
+    keybindings: MutableMap<Int, KeybindAction>,
     onClickDelete: (Int) -> Unit,
-    onClickRename: (Int,KeybindAction) -> Unit,
+    onClickRename: (Int, KeybindAction) -> Unit,
     modifier: Modifier = Modifier,
 ) {
 
@@ -69,15 +60,7 @@ fun KeyboardBindingContent(
         }
     }
 }
-fun getKeyCodeName(keyCode: Int): String {
-    val fields = KeyEvent::class.java.fields
-    for (field in fields) {
-        if (field.type == Int::class.javaPrimitiveType && field.getInt(null) == keyCode) {
-            return field.name
-        }
-    }
-    return "Unknown keycode"
-}
+
 
 
 
@@ -85,13 +68,13 @@ fun getKeyCodeName(keyCode: Int): String {
 private fun KeyboardBindingListItem(
     keyCode: Int,
     keybind: KeybindAction,
-    onRename: (Int,KeybindAction) -> Unit,
+    onRename: (Int, KeybindAction) -> Unit,
     onDelete: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val context = LocalContext.current
-    val keyEvent = KeyEvent(KeyEvent.ACTION_DOWN, keyCode).displayLabel.toString()
+
     val keyEventName = getKeyCodeName(keyCode)
+
     ElevatedCard(
         modifier = modifier,
     ) {

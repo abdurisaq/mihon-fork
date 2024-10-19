@@ -1,4 +1,4 @@
-package eu.kanade.presentation.more.settings
+package eu.kanade.presentation.more.settings.screen.reader.keybind.model
 import android.view.KeyEvent
 
 data class KeybindAction(
@@ -6,7 +6,7 @@ data class KeybindAction(
     val shortClickParameter: Float = 0f,
     val longClickFunctionName: String = "N/A",
     val longClickParameter: Float = 0f,
-    val longReleaseFunctionName: String = "N/A",
+    val longReleaseFunctionName: String = "stopContinuousScroll",
     val longReleaseParameter: Float = 0f,
 ) {
     fun serialize(): String {
@@ -28,6 +28,12 @@ data class KeybindAction(
             )
         }
 
+        fun emptyKeybindings(): Map<Int, KeybindAction> {
+            return mapOf()
+        }
+        fun bindableFunctions(): Array<String> {
+            return arrayOf("N/A","moveBackward","moveForward","toggleMenu","smoothScrollBackward","smoothScrollForward")
+        }
         // Method to provide default keybindings
         fun defaultKeybindings(): Map<Int, KeybindAction> {
             val defaultClickAmount = 0.75f
@@ -69,5 +75,24 @@ sealed interface KeybindActionSerializer {
             }
         }
     }
+}
+
+//un-optimal to loop through everything everytime i want a keycode name, maybe make a map once every time
+//and just keep it in a preference that can be queried
+fun getKeyCodeName(keyCode: Int): String {
+    val event = KeyEvent(KeyEvent.ACTION_DOWN, keyCode)
+    val displayLabel = event.displayLabel
+    if (displayLabel != ' ' && displayLabel != 0.toChar()) {
+        return displayLabel.toString() // Return the display label if valid
+    }
+
+    val fields = KeyEvent::class.java.fields
+    for (field in fields) {
+        if (field.type == Int::class.javaPrimitiveType && field.getInt(null) == keyCode) {
+            return field.name
+        }
+    }
+    return "Unknown keycode"
+
 }
 

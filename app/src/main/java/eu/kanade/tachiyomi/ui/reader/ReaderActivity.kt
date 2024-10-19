@@ -143,7 +143,7 @@ class ReaderActivity : BaseActivity() {
     private var isLongPress = 0
     private val keybind =
         Injekt.get<ReaderPreferences>()
-            .keybinds()
+            .keybindings()
             .get()
     /**
      * Called when the activity is created. Initializes the presenter and configuration.

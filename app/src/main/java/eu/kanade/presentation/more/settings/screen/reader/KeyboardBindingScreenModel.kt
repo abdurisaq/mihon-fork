@@ -4,13 +4,12 @@ import androidx.compose.runtime.Immutable
 import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import dev.icerock.moko.resources.StringResource
-import eu.kanade.presentation.more.settings.KeybindAction
+import eu.kanade.presentation.more.settings.screen.reader.keybind.model.KeybindAction
 import eu.kanade.presentation.more.settings.screen.reader.keybind.interactor.CreateKeybind
 import eu.kanade.presentation.more.settings.screen.reader.keybind.interactor.DeleteKeybind
-import eu.kanade.presentation.more.settings.screen.reader.keybind.interactor.GetKeybinds
+import eu.kanade.presentation.more.settings.screen.reader.keybind.interactor.GetKeybindings
 import eu.kanade.presentation.more.settings.screen.reader.keybind.interactor.RebindKeybind
-import kotlinx.collections.immutable.ImmutableMap
-import kotlinx.collections.immutable.toImmutableMap
+import eu.kanade.tachiyomi.ui.reader.setting.ReaderPreferences
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
@@ -20,7 +19,7 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 class KeyboardBindingScreenModel(
-    private val getKeybindsFromKeycode: GetKeybinds = Injekt.get(),
+    private val getKeybindingsFromKeycode: GetKeybindings = Injekt.get(),
     private val createKeybindWithKeycode: CreateKeybind = Injekt.get(),
     private val deleteKeybindWithKeycode: DeleteKeybind = Injekt.get(),
     private val rebindKeybind: RebindKeybind = Injekt.get(),
@@ -33,7 +32,7 @@ class KeyboardBindingScreenModel(
         screenModelScope.launch {
             mutableState.update {
                 KeyboardBindingScreenState.Success(
-                    currentKeybindings = getKeybindsFromKeycode.subscribe().toMutableMap()
+                    currentKeybindings = getKeybindingsFromKeycode.subscribe().toMutableMap()
                 )
             }
         }
@@ -44,7 +43,7 @@ class KeyboardBindingScreenModel(
             when(createKeybindWithKeycode.await(keyCode,keyAction)){
                 is CreateKeybind.Result.InternalError -> _events.send(KeybindEvent.InternalError)
                 else -> {
-                    val newKeybindings = getKeybindsFromKeycode.subscribe().toMutableMap()
+                    val newKeybindings = getKeybindingsFromKeycode.subscribe().toMutableMap()
                     mutableState.update {
                         when (it) {
                             is KeyboardBindingScreenState.Success -> it.copy(currentKeybindings = newKeybindings)
@@ -60,7 +59,7 @@ class KeyboardBindingScreenModel(
             when (deleteKeybindWithKeycode.await(keyCode = keyEvent)) {
                 is DeleteKeybind.Result.InternalError -> _events.send(KeybindEvent.InternalError)
                 else -> {
-                    val newKeybindings = getKeybindsFromKeycode.subscribe().toMutableMap()
+                    val newKeybindings = getKeybindingsFromKeycode.subscribe().toMutableMap()
                     mutableState.update {
                         when (it) {
                             is KeyboardBindingScreenState.Success -> it.copy(currentKeybindings = newKeybindings)
@@ -78,7 +77,7 @@ class KeyboardBindingScreenModel(
             when (rebindKeybind.await(keyCode, keyAction)) {
                 is RebindKeybind.Result.InternalError -> _events.send(KeybindEvent.InternalError)
                 else -> {
-                    val newKeybindings = getKeybindsFromKeycode.subscribe().toMutableMap()
+                    val newKeybindings = getKeybindingsFromKeycode.subscribe().toMutableMap()
                     mutableState.update {
                         when (it) {
                             is KeyboardBindingScreenState.Success -> it.copy(currentKeybindings = newKeybindings)

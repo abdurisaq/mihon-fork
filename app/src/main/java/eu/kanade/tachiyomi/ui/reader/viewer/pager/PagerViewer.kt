@@ -67,7 +67,7 @@ abstract class PagerViewer(val activity: ReaderActivity) : Viewer {
 
     private val keybind =
         Injekt.get<ReaderPreferences>()
-            .keybinds()
+            .keybindings()
             .get()
 
 

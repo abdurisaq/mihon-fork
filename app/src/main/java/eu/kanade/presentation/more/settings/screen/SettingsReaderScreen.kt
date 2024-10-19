@@ -5,12 +5,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalView
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import eu.kanade.presentation.more.settings.KeybindAction
-import eu.kanade.presentation.more.settings.KeybindActionSerializer
+import eu.kanade.presentation.more.settings.screen.reader.keybind.model.KeybindAction
+import eu.kanade.presentation.more.settings.screen.reader.keybind.model.KeybindActionSerializer
 import eu.kanade.presentation.more.settings.Preference
 import eu.kanade.presentation.more.settings.screen.reader.KeyboardBindingScreen
 import eu.kanade.tachiyomi.ui.reader.setting.ReaderOrientation
@@ -426,17 +425,17 @@ object SettingsReaderScreen : SearchableSettings {
 
     @Composable
     private fun getNavigationGroup(readerPreferences: ReaderPreferences): Preference.PreferenceGroup {
-        val scope = rememberCoroutineScope()
+        
 
 
         val readWithVolumeKeysPref = readerPreferences.readWithVolumeKeys()
-        val keyboardSupportPref = readerPreferences.variableStepScrolling()
-        val keybindingsPref = readerPreferences.keybinds()
+        val keyboardSupportPref = readerPreferences.keyboardSupport()
+        val keybindingsPref = readerPreferences.keybindings()
 
 
         val readWithVolumeKeys by readWithVolumeKeysPref.collectAsState()
         val keyboardSupport by keyboardSupportPref.collectAsState()
-        val keybinding by keybindingsPref.collectAsState()
+
         val navigator = LocalNavigator.currentOrThrow
 
         if(!keyboardSupport){
@@ -455,11 +454,11 @@ object SettingsReaderScreen : SearchableSettings {
                     enabled = readWithVolumeKeys,
                 ),
                 Preference.PreferenceItem.SwitchPreference(
-                    pref = readerPreferences.variableStepScrolling(),
-                    title = stringResource(MR.strings.pref_webtoon_variable_step_scrolling),
+                    pref = readerPreferences.keyboardSupport(),
+                    title = stringResource(MR.strings.pref_keyboard_support),
                 ),
                 Preference.PreferenceItem.TextPreference(
-                    title = "Keyboard support",
+                    title = stringResource(MR.strings.pref_edit_keyboard_bindings),
                     onClick = {
                         navigator.push(KeyboardBindingScreen())
                     },
